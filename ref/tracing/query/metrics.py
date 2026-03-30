@@ -50,6 +50,12 @@ def compute_per_token_pplx(model, encoded_inputs, labels):
         loss = loss.view(labels.size(0), -1)                     # reshape back to [batch, seq]
         return loss
 
+# NOTE: get_pplx is defined but never called anywhere in the codebase.
+# It has a different signature (sequences, model_id, revision, ...) than
+# the (model_path, texts) → array contract required by BasicStatistic.
+# It returns a scalar (mean loss), not a per-sequence array, so it cannot
+# be used as a metric for the Spearman correlation test.
+# Likely a standalone utility for ad-hoc checkpoint analysis (e.g., notebooks).
 def get_pplx(sequences,
              model_id,
              revision='main',
