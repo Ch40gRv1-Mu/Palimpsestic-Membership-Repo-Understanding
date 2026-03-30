@@ -16,6 +16,35 @@ class TestStatistic:
 #   (b) the difference in loss between Bob's model and a reference model
 # If Bob's model is derived from Alice's, sequences seen LATER in training
 # will have lower loss (better memorized), producing a significant correlation.
+#
+# ── document_index data structure ───────────────────────────────────────────
+# document_index is a DocumentIndex instance (from tracing/index.py) wrapping
+# Alice's training transcript. It exposes:
+#
+#   document_index.index = {
+#       "texts":  List[str],   # the actual training sequences (decoded text)
+#       "order":  List[int],   # position each sequence was seen during Alice's
+#                              #   training (i.e., training step index)
+#   }
+#   document_index.num_docs = int  # total number of sequences (len(texts))
+#
+# Example — constructing a document_index from a HuggingFace transcript:
+#
+#   from tracing.index import DocumentIndex
+#   from datasets import load_dataset
+#   from transformers import AutoTokenizer
+#
+#   transcript = load_dataset("hij/sequence_samples/pythia_deduped_100k",
+#                             split="train")
+#   tokens = list(transcript["tokens"])[:1000]   # token IDs per sequence
+#   order  = list(transcript["index"])[:1000]     # training-order position
+#   tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-6.9b-deduped")
+#   texts = tokenizer.batch_decode(tokens)
+#
+#   document_index = DocumentIndex(texts, order)
+#   # document_index.index["texts"]  → ["The quick brown ...", "In 1492 ...", ...]
+#   # document_index.index["order"]  → [4821, 120, 9953, ...]
+#
 class BasicStatistic:
     def __init__(self,document_index,metric,n=None,reference_path=None):
         self.texts = document_index.index["texts"]    # the training sequences (transcript)
